@@ -1,0 +1,18 @@
+parameters:
+  - name: environment
+    default: ""
+  - name: serviceConnection
+    default: ""
+  - name: agentPool
+    default: ""
+
+jobs:
+
+
+  - template: ../../templates/yaml/deploy-function-app.yml
+    parameters:
+      name: DeployFunctionApp
+      displayName: "Deploy Function App"
+      environment: "${{ parameters.environment }}"
+      serviceConnection: "${{ parameters.serviceConnection }}"
+      agentPool: "${{ parameters.agentPool }}"

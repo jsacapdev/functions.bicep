@@ -1,0 +1,66 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+    "name": "function",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [
+        7071,
+        10000,
+        10001,
+        10002
+    ],
+    "portsAttributes": {
+        "7071": {
+            "label": "Function App HTTP Endpoint",
+            "onAutoForward": "silent"
+        },
+        "10000": {
+            "label": "Azurite Blob Endpoint",
+            "onAutoForward": "silent"
+        },
+        "10001": {
+            "label": "Azurite Queue Endpoint",
+            "onAutoForward": "silent"
+        },
+        "10002": {
+            "label": "Azurite Table Endpoint",
+            "onAutoForward": "silent"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "pwsh",
+                "terminal.integrated.profiles.linux": {
+                    "pwsh": {
+                        "path": "/usr/bin/pwsh"
+                    }
+                }
+            },
+            "extensions": [
+                "ms-azuretools.vscode-azurefunctions",
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.csdevkit",
+                "ms-vscode.powershell",
+                "davidanson.vscode-markdownlint",
+                "streetsidesoftware.code-spell-checker",
+                "eamodio.gitlens",
+                "ms-sarifvscode.sarif-viewer",
+                "ms-azure-devops.azure-pipelines",
+                "github.copilot",
+                "github.copilot-chat",
+                "humao.rest-client"
+            ]
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/azure-cli:1": {
+            "version": "latest"
+        }
+    },
+    "onCreateCommand": "sudo apt-get update -y && sudo apt-get upgrade -y && sudo chown -R vscode:vscode /usr/bin/pwsh",
+    "updateContentCommand": "/usr/bin/pwsh -f .devcontainer/container-build.ps1",
+    "postStartCommand": "/usr/bin/pwsh -f .devcontainer/container-start.ps1"
+}

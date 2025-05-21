@@ -1,0 +1,78 @@
+parameters:
+- name: name
+  default: ''
+- name: displayName
+  default: ''
+- name: agentPool
+  default: ''
+- name: artifactName
+  default: ''
+
+jobs:
+- job: ${{ parameters.name }}
+  displayName: ${{ parameters.displayName }}
+  pool:
+    name: ${{ parameters.agentPool }}
+  steps:
+
+  - task: NuGetAuthenticate@1
+    displayName: 'artifact feed authenticate'
+
+  - task: AdvancedSecurity-Codeql-Init@1
+    displayName: 'set up advanced security scanning'
+    inputs:
+      enableAutomaticCodeQLInstall: true
+      languages: 'csharp'
+      querysuite: 'code-scanning'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'build'
+    inputs:
+      command: 'build'
+      projects: '**/Process.sln'      
+ 
+  - task: AdvancedSecurity-Codeql-Analyze@1
+    displayName: 'analyze code'      
+    inputs:
+      WaitForProcessing: true
+
+  - task: AdvancedSecurity-Dependency-Scanning@1
+    displayName: 'detect dependency vulnerabilities'
+
+  - task: AdvancedSecurity-Publish@1
+    displayName: 'publish advanced security scanning results'
+    inputs:
+      WaitForProcessing: true
+
+  - task: DotNetCoreCLI@2
+    displayName: 'run topic adapter tests'
+    inputs:
+      command: test
+      projects: '**/Process.sln'
+      arguments: '--configuration release --collect "XPlat Code coverage" -- RunConfiguration.DisableAppDomain=true'
+      testRunTitle: 'Process.Tests'
+
+  - task: reportgenerator@4
+    displayName: 'generate code coverage'
+    inputs:
+      reports: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      targetdir: '$(Build.SourcesDirectory)/coverlet/reports'
+      title: 'code coverage report'
+
+  - task: PublishCodeCoverageResults@2
+    displayName: 'publish code coverage'  
+    inputs:  
+      codeCoverageTool: Cobertura  
+      summaryFileLocation: '$(Build.SourcesDirectory)/coverlet/reports/Cobertura.xml'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'publish worker app'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: '**/Process.Function.csproj'
+      arguments: '--configuration Release --output $(build.artifactstagingdirectory)'
+
+  - publish: '$(Build.ArtifactStagingDirectory)'
+    displayName: 'publish artifact'
+    artifact: ${{ parameters.artifactName }}

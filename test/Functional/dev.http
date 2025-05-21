@@ -1,0 +1,5 @@
+### Health Check Trigger
+GET http://localhost:7071/api/HealthCheckTrigger HTTP/1.1
+
+###
+GET https://func-workload-westeu-sandpit-01.azurewebsites.net/api/HealthCheckTrigger HTTP/1.1

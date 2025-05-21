@@ -1,0 +1,24 @@
+parameters:
+- name: buildTemplatePath
+  default: ''
+- name: deployTemplatePath
+  default: ''
+
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+      - template: ${{ parameters.buildTemplatePath }}
+        parameters:
+          agentPool: 'LandingZonesBuildService'
+
+  - ${{ if or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/'), eq(variables['Build.SourceBranch'], 'refs/heads/dev')) }}:
+    - stage: DEV
+      displayName: DEV 
+      dependsOn: [Build]
+      jobs:
+        - template: ${{ parameters.deployTemplatePath }}
+          parameters:
+            environment: 'DEV'
+            agentPool: 'LandingZonesBuildServiceLinux'
+            serviceConnection: 'serviceConnection'            

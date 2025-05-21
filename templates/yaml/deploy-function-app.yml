@@ -1,0 +1,33 @@
+parameters:
+- name: name
+  default: ''
+- name: displayName
+  default: ''
+- name: environment
+  default: ''
+- name: serviceConnection
+  default: ''  
+- name: agentPool
+  default:  
+jobs:
+  - deployment: ${{ parameters.name }}
+    displayName: ${{ parameters.displayName }}
+    pool: ${{ parameters.agentPool }}
+      
+    environment: ${{ parameters.environment }}
+    strategy:
+      runOnce:
+        deploy:        
+          steps:
+          - download: current
+            displayName: Download Worker App Artifact
+            artifact: workerApp
+
+          - task: AzureCLI@2
+            displayName: "Deploy Bicep Template"
+            inputs:
+              azureSubscription: '${{ parameters.serviceConnection }}'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az --version

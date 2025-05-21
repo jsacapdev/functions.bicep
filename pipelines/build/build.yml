@@ -1,0 +1,8 @@
+jobs:
+
+  - template: ../../templates/yaml/build-function-app.yml
+    parameters:
+      name: BuildFunctionApp
+      displayName: 'Build Function App'
+      agentPool: ${{ parameters.agentPool }}
+      artifactName: 'functionApp'
